@@ -1,7 +1,3 @@
-# Wazuh Lab
-
----
-
 # Cross-Platform Intrusion Detection & Active Threat Response with Wazuh
 
 ## Demo
@@ -25,6 +21,8 @@ The core **workflow** is automated from detection to notification: Wazuh agents 
 - Termius - for SSH session mgmt
 
 ---
+
+# Initial Steps
 
 ## Setup Wazuh Manager
 
@@ -58,6 +56,8 @@ systemctl restart wazuh-manager.service
 ```
 
 ![image.png](res/image.png)
+
+Login to Wazuh dashboard.
 
 ![image.png](res/image%201.png)
 
@@ -209,88 +209,3 @@ Try pinging Ubuntu VM again.
 
 ![image.png](res/image%2015.png)
 
----
-
-## Configure Windows agent
-
----
-
-## Setup Sysmon
-
-- Download Sysmon: [https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
-
-- Get sysmon config: https://github.com/olafhartong/sysmon-modular
-
-### Install Sysmon
-
-```bash
-.\Sysmon64.exe -accepteula -i sysmonconfig.xml
-```
-
-![image.png](res/47f418ac-1803-46af-ae5b-e1ec5ba3ca76.png)
-
-Locate ossec.conf file on C:\Program Files (x86)\ossec-agent\ossec.conf
-
-Create a backup of ossec.conf → backup_ossec.conf 
-
-Configure ossec.conf to collect logs from Sysmon:
-
-```xml
-<!-- Sysmon added as a log source -->
-
-<localfile>
-	<location>Microsoft-Windows-Sysmon/Operational</location>
-	<log_format>eventchannel</log_format>
-</localfile>
-```
-
-![image.png](res/image%2016.png)
-
-Restart wazuh agent:
-
-```powershell
-Restart-Service WazuhSvc
-```
-
-[https://www.notion.so](https://www.notion.so)
-
-Wazuh getting logs via Sysmon
-
-![image.png](res/image%2017.png)
-
-### Running mimikatz.exe & Cipher.exe for PoC
-
-Get mimikatz:  https://github.com/ParrotSec/mimikatz 
-
-### Creating custom rules in Wazuh
-
-```xml
-<!-- Modify it at your will. -->
-
-<group name="windows, sysmon, cipher">
-		<rule id="998900" level="13">
-				<if_sid>61603</if_sid>
-				<field name="win.eventdata.image" type="pcre2">cipher.exe</field>
-				<description>Possible cipher.exe execution detected</description>
-		</rule>
-</group>
-```
-
-```xml
-<!-- Modify it at your will. -->
-
-<group name="local, syslog, sshd, ">
-		<rule id="100002" level="15">
-				<if_group>sysmon_event1</if_group>
-				<field name="win.eventdata.originalFileName" type="pcre2">(?i)mimikatz\.exe</field> 
-				<description>Mimikatz Usage Detected</description>
-				<mitre>	
-						<id>T1003</id>
-				</mitre>
-		</rule>
-</group>
-```
-
----
-
-#### Will continue the Windows Setup/ Configuration & Testing..
