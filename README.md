@@ -1,12 +1,10 @@
 # Cross-Platform Intrusion Detection & Active Threat Response with Wazuh
 
-## Demo
-
 ## Summary
 
 This project establishes a powerful, automated security monitoring system using **Wazuh** across virtualized **Windows 10** (with **Sysmon** for deep logging) and **Ubuntu** servers.
 
-The core **workflow** is automated from detection to notification: Wazuh agents collect diverse logs and forward them to the **Wazuh Manager**. The manager analyzes this data, identifies critical threats (e.g., brute force, malware activity via Sysmon events), and automatically generates high-level alerts. Using the **Wazuh Integrator**, the system instantly forwards these critical alerts via both **Slack** and **Email** to security personnel, ensuring immediate and multi-channel incident notification for rapid response.
+The core workflow is automated from detection to notification: Wazuh agents collect diverse logs and forward them to the **Wazuh Manager**. The manager analyzes this data, identifies critical threats (e.g., brute force, malware activity via Sysmon events), and automatically generates high-level alerts. Using the **Wazuh Integrator**, the system instantly forwards these critical alerts via both **Slack** and **Email** to security personnel, ensuring immediate and multi-channel incident notification for rapid response.
 
 ## Lab overview
 
@@ -59,8 +57,6 @@ Login to Wazuh dashboard.
 
 ![image.png](res/image%201.png)
 
-Windows 10 agent showing on Wazuh manager dashboard
-
 ![image.png](res/image%202.png)
 
 ---
@@ -92,7 +88,7 @@ ufw allow 1514
 
 ![image.png](res/44e054a4-9128-45d8-9f21-43623760f137.png)
 
-Ubuntu agent showing on Wazuh manager dashboard
+Windows 10 agent showing on Wazuh manager dashboard:
 
 ![image.png](res/image%205.png)
 
@@ -125,6 +121,8 @@ sudo systemctl status wazuh-agent
 ```
 
 ![image.png](res/e2f978c7-1a8e-41a7-921f-ceefb26bad8a.png)
+
+Ubuntu agent showing on Wazuh manager dashboard:
 
 ![image.png](res/image%208.png)
 
@@ -179,7 +177,7 @@ sudo systemctl restart wazuh-manager.service
 
 ## PoC - Ubuntu agent
 
-### Using Hydra to perform a bruteforce attack on Ubuntu agent
+### Used Hydra to perform a bruteforce attack on Ubuntu agent
 
 - Download hydra from Github: https://github.com/vanhauser-thc/thc-hydra.git
 
@@ -219,4 +217,4 @@ sudo hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://139.59.126.244
 
 ## Configure Windows agent
 
-#### Will continue the Windows Setup/ Configuration & Testing..
+**To be continued with the Windows Config/PoC**
