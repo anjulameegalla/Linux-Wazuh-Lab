@@ -16,15 +16,13 @@ The core **workflow** is automated from detection to notification: Wazuh agents 
 
 ## Utilities used
 
-- [DigitalOcean](https://cloud.digitalocean.com/droplets/) [ 2x Ubuntu 24.04 Droplets ]
-- VMWare [ Windows 10, Kali VMs ]
-- Termius - for SSH session mgmt
+- **DigitalOcean - 2x Ubuntu 24.04 Droplets**
+- **VMWare - Windows 10, Kali VMs**
+- **Termius - for SSH session mgmt**
 
 ---
 
-# Initial Steps
-
-## Setup Wazuh Manager
+## Setting up Wazuh Manager
 
 ### Install Wazuh Manager
 
@@ -61,6 +59,8 @@ Login to Wazuh dashboard.
 
 ![image.png](res/image%201.png)
 
+Windows 10 agent showing on Wazuh manager dashboard
+
 ![image.png](res/image%202.png)
 
 ---
@@ -91,6 +91,8 @@ ufw allow 1514
 ```
 
 ![image.png](res/44e054a4-9128-45d8-9f21-43623760f137.png)
+
+Ubuntu agent showing on Wazuh manager dashboard
 
 ![image.png](res/image%205.png)
 
@@ -173,11 +175,15 @@ Restart Wazuh mgr.
 sudo systemctl restart wazuh-manager.service
 ```
 
-### Using Hydra to perform a bruteforce attack on Ubuntu VM
+---
+
+## PoC - Ubuntu agent
+
+### Using Hydra to perform a bruteforce attack on Ubuntu agent
 
 - Download hydra from Github: https://github.com/vanhauser-thc/thc-hydra.git
 
-Ping Ubuntu VM IP from Kali.
+**1. Ping Ubuntu VM IP from Kali**
 
 ```bash
 ping <ubuntu vm public ip>
@@ -185,7 +191,7 @@ ping <ubuntu vm public ip>
 
 ![image.png](res/image%2011.png)
 
-Execute a bruteforce SSH attack using Hydra.
+**2. Execute a bruteforce SSH attack using Hydra**
 
 ```bash
 sudo hydra -l <username> -P <passlist.txt> ssh://<ubuntu vm ip address>
@@ -199,13 +205,18 @@ sudo hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://139.59.126.244
 
 ![image.png](res/image%2012.png)
 
-SSHd Failed login attempts and Host firewall-drop events recorded
+**3. Try pinging Ubuntu VM again. It won't ping.**
+
+![image.png](res/image%2015.png)
+
+**4. SSHd Failed login attempts and Host firewall-drop events recorded on Wazuh manager**
 
 ![image.png](res/image%2013.png)
 
 ![image.png](res/image%2014.png)
 
-Try pinging Ubuntu VM again.
+---
 
-![image.png](res/image%2015.png)
+## Configure Windows agent
 
+#### Will continue the Windows Setup/ Configuration & Testing..
