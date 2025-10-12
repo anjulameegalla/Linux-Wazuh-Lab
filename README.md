@@ -1,7 +1,10 @@
+# Wazuh Lab
+
+---
+
 # Cross-Platform Intrusion Detection & Active Threat Response with Wazuh
 
 ## Demo
-
 
 ## Summary
 
@@ -11,14 +14,14 @@ The core **workflow** is automated from detection to notification: Wazuh agents 
 
 ## Lab overview
 
-![diagram-export-9-30-2025-10_03_49-PM.png](diagram-export-9-30-2025-10_03_49-PM.png)
+![diagram-export-9-30-2025-10_03_49-PM.png](res/diagram-export-9-30-2025-10_03_49-PM.png)
 
 
 
 ## Utilities used
 
 - [DigitalOcean](https://cloud.digitalocean.com/droplets/) [ 2x Ubuntu 24.04 Droplets ]
-- Oracle Virtualbox [ Windows 10 VM ]
+- VMWare [ Windows 10, Kali VMs ]
 - Termius - for SSH session mgmt
 
 ---
@@ -54,11 +57,11 @@ If not running:
 systemctl restart wazuh-manager.service
 ```
 
-![image.png](image.png)
+![image.png](res/image.png)
 
-![image.png](image%201.png)
+![image.png](res/image%201.png)
 
-![image.png](image%202.png)
+![image.png](res/image%202.png)
 
 ---
 
@@ -66,9 +69,9 @@ systemctl restart wazuh-manager.service
 
 Click “Deploy new agent” and select Windows MSI 32/64 bit version.
 
-![image.png](image%203.png)
+![image.png](res/image%203.png)
 
-![image.png](image%204.png)
+![image.png](res/image%204.png)
 
 Copy the “Invoke-WebRequest” command & Run in Administrator Powershell on Windows10 VM.
 
@@ -78,7 +81,7 @@ Start the Wazuh agent:
 net start wazuhsvc
 ```
 
-![image.png](34d3defb-ec65-415d-81ed-cc1799ba241f.png)
+![image.png](res/34d3defb-ec65-415d-81ed-cc1799ba241f.png)
 
 Allow port 1515 & 1514 on Wazuh server:
 
@@ -87,9 +90,9 @@ ufw allow 1515
 ufw allow 1514
 ```
 
-![image.png](44e054a4-9128-45d8-9f21-43623760f137.png)
+![image.png](res/44e054a4-9128-45d8-9f21-43623760f137.png)
 
-![image.png](image%205.png)
+![image.png](res/image%205.png)
 
 ---
 
@@ -97,13 +100,13 @@ ufw allow 1514
 
 Deploy new agent and select Linux DEB amd64 version.
 
-![image.png](image%206.png)
+![image.png](res/image%206.png)
 
-![image.png](image%207.png)
+![image.png](res/image%207.png)
 
 Copy the “wget” command & Run on terminal.
 
-![image.png](9eeedc07-5448-4686-9cbb-a7638b2557a3.png)
+![image.png](res/9eeedc07-5448-4686-9cbb-a7638b2557a3.png)
 
 Start the Wazuh agent:
 
@@ -119,13 +122,98 @@ Check the status:
 sudo systemctl status wazuh-agent
 ```
 
-![image.png](e2f978c7-1a8e-41a7-921f-ceefb26bad8a.png)
+![image.png](res/e2f978c7-1a8e-41a7-921f-ceefb26bad8a.png)
 
-![image.png](image%208.png)
+![image.png](res/image%208.png)
+
+---
+
+## Configure Ubuntu agent
+
+Ensure that the Wazuh agent is properly configured to communicate with the Wazuh server (Check the IP of Wazuh):
+
+```bash
+ nano /var/ossec/etc/ossec.conf
+```
+
+![image.png](res/image%209.png)
+
+Restart the agent if any changes were done.
+
+```bash
+sudo systemctl restart wazuh-agent
+```
+
+### Adding Wazuh manager rule to trigger on expected events
+
+Navigate and edit the ossec.conf file on Wazuh manager:
+
+```powershell
+ nano /var/ossec/etc/ossec.conf
+```
+
+Add following active-response rule:
+
+- This configuration suggests that when a rule with ID 5710 is triggered, the firewall will drop the corresponding traffic for a duration of 10 minutes. It's a common approach for dealing with potential threats or suspicious activity.
+
+```xml
+<active-response>
+  <command>firewall-drop</command>
+  <location>local</location>
+  <rules_id>5710</rules_id>
+  <timeout>600</timeout>
+</active-response>
+```
+
+![image.png](res/image%2010.png)
+
+Restart Wazuh mgr.
+
+```bash
+sudo systemctl restart wazuh-manager.service
+```
+
+### Using Hydra to perform a bruteforce attack on Ubuntu VM
+
+- Download hydra from Github: https://github.com/vanhauser-thc/thc-hydra.git
+
+Ping Ubuntu VM IP from Kali.
+
+```bash
+ping <ubuntu vm public ip>
+```
+
+![image.png](res/image%2011.png)
+
+Execute a bruteforce SSH attack using Hydra.
+
+```bash
+sudo hydra -l <username> -P <passlist.txt> ssh://<ubuntu vm ip address>
+```
+
+In this case:
+
+```bash
+sudo hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://139.59.126.244
+```
+
+![image.png](res/image%2012.png)
+
+SSHd Failed login attempts and Host firewall-drop events recorded
+
+![image.png](res/image%2013.png)
+
+![image.png](res/image%2014.png)
+
+Try pinging Ubuntu VM again.
+
+![image.png](res/image%2015.png)
 
 ---
 
 ## Configure Windows agent
+
+---
 
 ## Setup Sysmon
 
@@ -139,22 +227,70 @@ sudo systemctl status wazuh-agent
 .\Sysmon64.exe -accepteula -i sysmonconfig.xml
 ```
 
-![image.png](47f418ac-1803-46af-ae5b-e1ec5ba3ca76.png)
+![image.png](res/47f418ac-1803-46af-ae5b-e1ec5ba3ca76.png)
+
+Locate ossec.conf file on C:\Program Files (x86)\ossec-agent\ossec.conf
+
+Create a backup of ossec.conf → backup_ossec.conf 
+
+Configure ossec.conf to collect logs from Sysmon:
+
+```xml
+<!-- Sysmon added as a log source -->
+
+<localfile>
+	<location>Microsoft-Windows-Sysmon/Operational</location>
+	<log_format>eventchannel</log_format>
+</localfile>
+```
+
+![image.png](res/image%2016.png)
+
+Restart wazuh agent:
+
+```powershell
+Restart-Service WazuhSvc
+```
+
+[https://www.notion.so](https://www.notion.so)
+
+Wazuh getting logs via Sysmon
+
+![image.png](res/image%2017.png)
+
+### Running mimikatz.exe & Cipher.exe for PoC
+
+Get mimikatz:  https://github.com/ParrotSec/mimikatz 
+
+### Creating custom rules in Wazuh
+
+```xml
+<!-- Modify it at your will. -->
+
+<group name="windows, sysmon, cipher">
+		<rule id="998900" level="13">
+				<if_sid>61603</if_sid>
+				<field name="win.eventdata.image" type="pcre2">cipher.exe</field>
+				<description>Possible cipher.exe execution detected</description>
+		</rule>
+</group>
+```
+
+```xml
+<!-- Modify it at your will. -->
+
+<group name="local, syslog, sshd, ">
+		<rule id="100002" level="15">
+				<if_group>sysmon_event1</if_group>
+				<field name="win.eventdata.originalFileName" type="pcre2">(?i)mimikatz\.exe</field> 
+				<description>Mimikatz Usage Detected</description>
+				<mitre>	
+						<id>T1003</id>
+				</mitre>
+		</rule>
+</group>
+```
 
 ---
 
-## Configure Ubuntu agent
-
-Ensure that the Wazuh agent is properly configured to communicate with the Wazuh server (Check the IP of Wazuh):
-
-```bash
- nano /var/ossec/etc/ossec.conf
-```
-
-![image.png](image%209.png)
-
-Restart the agent if any changes were done.
-
-```bash
-sudo systemctl restart wazuh-agent
-```
+#### Will continue the Windows Setup/ Configuration & Testing..
