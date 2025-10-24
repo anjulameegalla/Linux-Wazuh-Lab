@@ -1,21 +1,19 @@
-# Cross-Platform Intrusion Detection & Active Threat Response with Wazuh
+# Intrusion Detection & Active Threat Response with Wazuh
 
 ## Summary
 
-This project establishes a powerful, automated security monitoring system using **Wazuh** across virtualized **Windows 10** (with **Sysmon** for deep logging) and **Ubuntu** servers.
-
-The core workflow is automated from detection to notification: Wazuh agents collect diverse logs and forward them to the **Wazuh Manager**. The manager analyzes this data, identifies critical threats (e.g., brute force, malware activity via Sysmon events), and automatically generates high-level alerts. Using the **Wazuh Integrator**, the system instantly forwards these critical alerts via both **Slack** and **Email** to security personnel, ensuring immediate and multi-channel incident notification for rapid response.
+This project establishes an automated security monitoring and active response pipeline. The core workflow begins with a Kali Linux Attacker machine launching a **brute-force attack** using **Hydra** against a monitored **Ubuntu Agent** VM. The Wazuh agent on the Ubuntu server detects this hostile activity, collects the relevant logs, and forwards them to the central **Wazuh Manager**. Upon analyzing the data and identifying the signature of the brute-force attack, the manager triggers an active response, automatically deploying a new **firewall rule** on the agent to block the attacker's IP address and neutralize the threat.
 
 ## Lab overview
 
-![diagram-export-9-30-2025-10_03_49-PM.png](res/diagram-export-9-30-2025-10_03_49-PM.png)
+![Lab-overview.png](res/diagram.png)
 
 
 
 ## Utilities used
 
 - **DigitalOcean - 2x Ubuntu 24.04 Droplets**
-- **VMWare - Windows 10, Kali VMs**
+- **VMWare - Kali VM**
 - **Termius - for SSH session mgmt**
 
 ---
@@ -175,13 +173,15 @@ sudo systemctl restart wazuh-manager.service
 
 ---
 
-## PoC - Ubuntu agent
+<br>
+
+## PoC [Proof-of-Concept]
 
 ### Used Hydra to perform a bruteforce attack on Ubuntu agent
 
 - Download hydra from Github: https://github.com/vanhauser-thc/thc-hydra.git
 
-**1. Ping Ubuntu VM IP from Kali**
+#### **1. Ping Ubuntu VM IP from Kali**
 
 ```bash
 ping <ubuntu vm public ip>
@@ -189,7 +189,7 @@ ping <ubuntu vm public ip>
 
 ![image.png](res/image%2011.png)
 
-**2. Execute a bruteforce SSH attack using Hydra**
+#### **2. Execute a bruteforce SSH attack using Hydra**
 
 ```bash
 sudo hydra -l <username> -P <passlist.txt> ssh://<ubuntu vm ip address>
@@ -203,18 +203,13 @@ sudo hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://139.59.126.244
 
 ![image.png](res/image%2012.png)
 
-**3. Try pinging Ubuntu VM again. It won't ping.**
+#### **3. Try pinging Ubuntu VM again. It won't ping.**
 
 ![image.png](res/image%2015.png)
 
-**4. SSHd Failed login attempts and Host firewall-drop events recorded on Wazuh manager**
+#### **4. SSHd Failed login attempts and Host firewall-drop events recorded on Wazuh manager**
 
 ![image.png](res/image%2013.png)
 
 ![image.png](res/image%2014.png)
 
----
-
-## Configure Windows agent
-
-**To be continued with the Windows Config/PoC**
